@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
   name: { type: String, required: false, default: "" },
   email: { type: String, required: true },
   password: { type: String, required: true },
+  admin: { type: Boolean, required: true, default: false },
 });
 
 const UserModel = mongoose.model("User", UserSchema);
@@ -17,7 +18,7 @@ class User {
     this.user = null;
   }
 
-  async user() {
+  async login() {
     this.valida();
     if (this.errors.length > 0) return;
 
@@ -33,6 +34,8 @@ class User {
       this.user = null;
       return;
     }
+
+    return this.user.admin;
   }
 
   async register() {
@@ -51,10 +54,6 @@ class User {
 
   valida() {
     this.cleanUp();
-    //Validação:
-    //O nome pode estar vazio
-    //O email precisa ser válido
-    //Senha precisa ter entre 3 e 50 caracteres
 
     if (!validator.isEmail(this.body.email))
       this.errors.push("E-mail inválido");
@@ -64,21 +63,26 @@ class User {
   }
 
   cleanUp() {
-    for (const key in this.body) {
-      if (typeof this.body[key] !== "string") {
-        this.body[key] = "";
-      }
-    }
     this.body = {
       name: this.body.name,
       email: this.body.email,
       password: this.body.password,
+      admin: this.body.admin,
     };
   }
 
   async userExists() {
     this.user = await UserModel.findOne({ email: this.body.email });
     if (this.user) this.errors.push("Usuário já existe");
+  }
+  
+  async edit(id) {
+    if (typeof id !== "string") return;
+    this.valida();
+    if (this.errors.length > 0) return;
+    this.user = await UserModel.findByIdAndUpdate(id, this.body, {
+      new: true,
+    });
   }
 }
 

@@ -1,25 +1,26 @@
 const express = require("express");
 const route = express.Router(); // faz o roteamento entre páginas, vrifica a rota e chama um controlador
-const homeController = require("./src/controllers/homeController");
 const userController = require("./src/controllers/userController");
 const alunoController = require("./src/controllers/alunoController");
 
-const { loginRequired } = require("./src/middlewares/middleware");
+const { loginRequired, isAdmin } = require("./src/middlewares/middleware");
 
-//Rotas da home
-route.get("/", homeController.index);
 
-//Rotas de login
-route.get("/user", loginRequired, userController.index);
-route.post("/user/register", userController.register);
-route.post("/user/login", userController.login);
+//Rotas de logins
+route.post("/register", userController.store);
+route.post("/login", userController.login);
 route.get("/logout", userController.logout);
 
+//Rotas de usuário
+route.get("/user/:id?", loginRequired, isAdmin, userController.index);
+route.put("/user/:id?", loginRequired, isAdmin, userController.update);
+route.delete("/user/:id?", loginRequired, isAdmin, userController.delete);
+
 //Rotas de aluno
-route.get("/aluno", loginRequired, alunoController.index);
-route.post("/aluno/register", loginRequired, alunoController.register);
-route.get("/aluno/:id", loginRequired, alunoController.editIndex);
-route.post("/aluno/edit/:id", loginRequired, alunoController.edit);
-route.get("/aluno/delete/:id", loginRequired, alunoController.delete);
+route.get("/", loginRequired, alunoController.index);
+route.post("/", loginRequired, alunoController.store);
+route.put("/:id", loginRequired, alunoController.update);
+route.get("/:id", loginRequired, alunoController.show);
+route.delete("/:id", loginRequired, alunoController.delete);
 
 module.exports = route;
