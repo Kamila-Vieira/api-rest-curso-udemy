@@ -4,7 +4,7 @@ const app = express();
 const mongoose = require("mongoose");
 
 mongoose
-  .connect(process.env.CONNECTIONSTRING, {
+  .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
@@ -23,7 +23,7 @@ app.use(express.json());
 
 const sessionOptions = session({
   secret: process.env.SESSIONSECRET,
-  store: MongoStore.create({ mongoUrl: process.env.CONNECTIONSTRING }),
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   resave: false,
   saveUninitialized: false,
   cookie: {
